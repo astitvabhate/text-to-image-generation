@@ -8,7 +8,7 @@ const registerUser = async (req, res) =>{
         const{name,email,password} = req.body;
 
         if (!name || !email || !password){
-            return res.status(400).json({message: "details missing"})
+            return res.status(400).json({success: false, message: "All fields are required"})
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -25,7 +25,7 @@ const registerUser = async (req, res) =>{
             email
         })
         if (existingUser){
-            return res.json({success: false, message: "User already exists"})
+            return res.status(400).json({success: false, message: "User already exists"})
         }else{
 
             const newUser = new userModel(userData);
@@ -33,13 +33,22 @@ const registerUser = async (req, res) =>{
 
             const token = jwt.sign({id: user._id}, process.env.JWT_SECRET_KEY)
 
-            res.json({success : true, token, user: {name: user.name}})
+            res.json({
+                success: true, 
+                token, 
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    creditBalance: user.creditBalance
+                }
+            })
 
         }
 
     }catch(error){
        console.log("error in registerUser", error);
-       res.json({success: false, message: error.message})
+       res.status(500).json({success: false, message: error.message})
        
     }
 }
@@ -48,27 +57,41 @@ const registerUser = async (req, res) =>{
 const loginUser = async (req, res)=>{
     try {
         const {email, password} = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({success: false, message: "Email and password are required"})
+        }
+        
         const user = await userModel.findOne({
             email
         })
 
         if (!user){
-            return res.json({success: false, message: "User not found"})
+            return res.status(404).json({success: false, message: "User not found"})
         }
         const isMatch = await bcrypt.compare(password, user.password)
 
         if(isMatch){
 
             const token = jwt.sign({id: user._id}, process.env.JWT_SECRET_KEY)
-            res.json({success : true, token, user: {name: user.name}})
+            res.json({
+                success: true, 
+                token, 
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    creditBalance: user.creditBalance
+                }
+            })
 
         }else{
-            return res.status(400).json({message: "Invalid credentials"})
+            return res.status(400).json({success: false, message: "Invalid credentials"})
         }
 
     } catch (error) {
         console.log("error in loginUser", error);
-        res.json({success: false, message: error.message})
+        res.status(500).json({success: false, message: error.message})
     }
 }
 
@@ -76,10 +99,13 @@ const userCredits = async (req, res) =>{
     try {
         const {userId} = req.body
         const user = await userModel.findById(userId)
-        res.json({success: true, user: {name: user.name}})
+        if (!user) {
+            return res.status(404).json({success: false, message: "User not found"})
+        }
+        res.json({success: true, user: {name: user.name , credit: user.creditBalance}})
     } catch (error) {
         console.log("error in userCredits", error);
-        res.json({success: false, message: error.message})
+        res.status(500).json({success: false, message: error.message})
     }
 }
 

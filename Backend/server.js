@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
 import userRouter from './routes/userRoutes.js'
+import imageRouter from './routes/imageRoutes.js'
 import connectDB from './config/mongodb.js'
 
 
@@ -14,7 +15,8 @@ app.use(cors())
 
 await connectDB();
 
-app.use('/api/user',userRouter)
+app.use('/api/user', userRouter)
+app.use('/api/image', imageRouter)
 
 
 app.get('/check', (req, res) => { 

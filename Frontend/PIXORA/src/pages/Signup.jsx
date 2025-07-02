@@ -1,31 +1,123 @@
-import React from 'react'
+import React, { useState } from 'react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 const Signup = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState(''); 
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+
+// Function to handle form submission and store the signup form data to mongoDB use axios 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    
+    const userData = {
+      name,
+      email,
+      password
+    };
+    
+    try {
+      const response = await axios.post('http://localhost:5000/api/user/register', userData);
+      console.log('Success:', response.data);
+      
+      if (response.data.success) {
+        // Store user data in localStorage
+        localStorage.setItem('token', response.data.token)
+        localStorage.setItem('userName', response.data.user.name)
+        localStorage.setItem('userId', response.data.user.id)
+        localStorage.setItem('userCredits', '5') // New users get 5 credits
+        
+        setMessage('Registration successful! Redirecting...');
+        
+        // Clear form
+        setName('');
+        setEmail('');
+        setPassword('');
+        
+        // Redirect to home page after a delay
+        setTimeout(() => {
+          navigate('/')
+          window.location.reload() // Refresh to update navbar
+        }, 1500);
+      } else {
+        setMessage(response.data.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setMessage(error.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    //blur background whith a form in the middle add cross icon to close the form and a submit button and fileds with name email and password 
     <div>
       <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
       <div className="fixed inset-0 z-10 overflow-y-auto">
         <div className="flex items-center justify-center min-h-full p-4 text-center">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-bold mb-4">Sign Up</h2>
-            <form>
-              <input type="text" placeholder="Name" className="w-full p-2 mb-4 border rounded" />
-              <input type="email" placeholder="Email" className="w-full p-2 mb-4 border rounded" />
-              <input type="password" placeholder="Password" className="w-full p-2 mb-4 border rounded" />
-              <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Submit</button>
+            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Join Pixora</h2>
+            
+            {message && (
+              <div className={`p-3 mb-4 rounded ${message.includes('successful') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {message}
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input 
+                onChange={e => setName(e.target.value)} 
+                value={name} 
+                type="text" 
+                placeholder="Name" 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400" 
+                required
+              />
+              <input 
+                onChange={e => setEmail(e.target.value)} 
+                value={email} 
+                type="email" 
+                placeholder="Email" 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400" 
+                required
+              />
+              <input 
+                onChange={e => setPassword(e.target.value)} 
+                value={password} 
+                type="password" 
+                placeholder="Password" 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400" 
+                required
+                minLength="6"
+              />
+              <button 
+                type="submit" 
+                disabled={loading}
+                className={`w-full p-3 rounded-lg font-semibold text-white transition-colors ${
+                  loading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+                }`}
+              >
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </button>
               <div>
                 <p className='text-sm text-gray-600 mt-2'>
-                  Already have an account? <a href="/login" className="text-blue-500 hover:underline">Login</a>
+                  Already have an account? <a href="/login" className="text-purple-500 hover:underline font-semibold">Login</a>
                 </p>
               </div>
-            
             </form>
           </div>
         </div>
       </div>
     </div>
+  )
+}
 
-  )}
-
-  export default Signup
+export default Signup
