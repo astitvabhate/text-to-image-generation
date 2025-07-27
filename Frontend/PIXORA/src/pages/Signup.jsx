@@ -23,7 +23,7 @@ const Signup = () => {
     };
     
     try {
-      const response = await axios.post('http://localhost:5000/api/user/register', userData);
+      const response = await axios.post('https://text-to-image-generation-orcin.vercel.app/api/user/register', userData);
       console.log('Success:', response.data);
       
       if (response.data.success) {

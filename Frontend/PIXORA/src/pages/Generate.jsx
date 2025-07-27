@@ -40,7 +40,7 @@ const Generate = () => {
     setError('')
     setGeneratedImage(null)
     try {
-      const response = await axios.post('http://localhost:5000/api/image/generate', {
+      const response = await axios.post('https://text-to-image-generation-orcin.vercel.app/api/image/generate', {
         prompt: prompt.trim(),
         userId: localStorage.getItem('userId')
       })
