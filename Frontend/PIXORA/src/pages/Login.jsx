@@ -15,7 +15,7 @@ const Login = () => {
     setMessage('')
     
     try {
-      const response = await axios.post('https://text-to-image-generation-orcin.vercel.app/api/user/login', {
+      const response = await axios.post('https://pixora-backend-kmsm.onrender.com/api/user/login', {
         email,
         password
       })

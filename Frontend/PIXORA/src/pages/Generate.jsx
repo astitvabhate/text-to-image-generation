@@ -40,7 +40,7 @@ const Generate = () => {
     setError('')
     setGeneratedImage(null)
     try {
-      const response = await axios.post('https://text-to-image-generation-orcin.vercel.app/api/image/generate', {
+      const response = await axios.post('https://pixora-backend-kmsm.onrender.com/api/image/generate', {
         prompt: prompt.trim(),
         userId: localStorage.getItem('userId')
       })

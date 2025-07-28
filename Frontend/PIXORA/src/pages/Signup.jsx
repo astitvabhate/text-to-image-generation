@@ -23,7 +23,7 @@ const Signup = () => {
     };
     
     try {
-      const response = await axios.post('https://text-to-image-generation-orcin.vercel.app/api/user/register', userData);
+      const response = await axios.post('https://pixora-backend-kmsm.onrender.com/api/user/register', userData);
       console.log('Success:', response.data);
       
       if (response.data.success) {
